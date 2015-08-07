@@ -69,7 +69,7 @@ func (u *YbUser) Start() {
 			case <-userTick.C:
 				err := u.Conn.WriteMessage(websocket.TextMessage, []byte("heartbeat"))
 				if err != nil {
-					fmt.Printf("heartbeat failed for user[%s]\n", u.Name)
+					fmt.Printf("heartbeat failed for user[%s] with error[%s]\n", u.Name, err.Error())
 					u.Stop()
 					return
 				}

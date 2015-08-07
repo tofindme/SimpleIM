@@ -1,0 +1,61 @@
+
+<html>
+
+<head>
+  
+
+</head>
+
+<body>
+
+
+<div id="home">
+
+  <h2>The Chat demonstration (from Play!)</h2>
+
+  <div id="signin">
+    <form action="/user" onsubmit="return CheckInput()">
+      <p>
+        <label for="nick">Choose a nick name</label>
+        <input type="text" name="user" id="user" maxlength="10">
+        <br><br>
+        <label for="nick">Choose a room</label>
+        <input type="text" name="room" id="room">
+      </p>
+      <!-- <p>
+        <label for="nick">Demonstration</label>
+        <select name="demo">
+          <option></option>
+          <option value="refresh">Ajax, active refresh</option>
+          <option value="longpolling">Ajax, long polling</option>
+          <option value="websocket">WebSocket</option>
+        </select>
+      </p> -->
+      <p>
+        <label></label>
+        <input type="submit" id="enter" value="Enter the chat room">
+      </p>
+    </form>
+  </div>
+
+</div>
+
+</body>
+
+<script type="text/javascript">
+    function CheckInput(){
+      var user = document.getElementById("user");
+      if (user.value==""){
+        alert("user is empty,please check!");
+        return false;
+      }
+      var room = document.getElementById("room");
+      if (room.value=="") {
+        alert("room is empty,please check!");
+        return false;
+      }
+      return true;
+  }
+
+</script>
+</html>

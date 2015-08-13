@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/gorilla/websocket"
+	"io"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -23,14 +24,40 @@ func (r RouterHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 
 	//dispatch action
 	switch req.URL.Path {
-	case "/login":
+	case "/login", "/":
 		r.ProcessLogin(w, req)
 	case "/user":
 		r.ProcessUser(w, req)
+	case "/upload":
+		r.ProcessUpload(w, req)
 	case "/ws":
 		r.ProcessWebsocket(w, req)
+	// case "/download":
+	// http.ServeFile(w, req, "./uploads")
+	// http.FileServer(http.Dir("./")).ServeHTTP()
 	default:
 		http.Error(w, "not found for the url", 500)
+	}
+}
+
+func (r RouterHandler) ProcessUpload(w http.ResponseWriter, req *http.Request) {
+	fmt.Printf("req.Method is %s\n", req.Method)
+	if req.Method == "POST" {
+		req.ParseMultipartForm(32 << 20)
+		file, handler, err := req.FormFile("file")
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		defer file.Close()
+		fmt.Fprintf(w, "%v", handler.Header)
+		f, err := os.OpenFile("./uploads/"+handler.Filename, os.O_WRONLY|os.O_CREATE, 0666)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		defer f.Close()
+		io.Copy(f, file)
 	}
 }
 
@@ -117,12 +144,25 @@ func (r RouterHandler) ProcessWebsocket(w http.ResponseWriter, req *http.Request
 func main() {
 
 	handler := RouterHandler{}
+
+	// http.Handle("/download", http.FileServer(http.Dir("/tmp")))
 	server := &http.Server{
 		Addr:         ":9000",
 		Handler:      handler,
 		ReadTimeout:  time.Second * 10,
 		WriteTimeout: time.Second * 10,
 	}
+
+	go func() {
+		fmt.Println(http.ListenAndServe(":9001", http.FileServer(http.Dir("./uploads"))))
+	}()
+
+	// http.HandleFunc("/", ProcessLogin)
+	// http.HandleFunc("/login", ProcessLogin)
+	// http.HandleFunc("/user", ProcessUser)
+	// http.HandleFunc("/upload", ProcessUpload)
+	// http.HandleFunc("/ws", ProcessWebsocket)
+	// http.Handle("/download", http.FileServer(http.Dir("./uploads")))
 
 	if err := server.ListenAndServe(); err != nil {
 		fmt.Printf("litern failed with error : %s\n", err.Error())

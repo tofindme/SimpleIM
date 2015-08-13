@@ -1,0 +1,24 @@
+package main
+
+import (
+	"fmt"
+	"net/http"
+)
+
+type MyHandler struct{}
+
+func (h MyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+
+	fmt.Fprintf(w, "heloalakf")
+
+}
+
+func main() {
+
+	h := &MyHandler{}
+
+	http.Handle("/download", h)
+
+	fmt.Println(http.ListenAndServe(":9000", nil))
+
+}
